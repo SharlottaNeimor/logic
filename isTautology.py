@@ -11,7 +11,9 @@ def isTautology(F):
         v = str(bin(i))[2:]
         for j in range(len(v)):
             x[j] = int(v[len(v)-j-1])
-        if calc(F,x) == 0: return False
+        if calc(F,x) == 0:
+            print('0-valued term: ',*x,0)
+            return False
     return True
 
 def arity(F): return max(list(map(int,re.findall(r'\d+',F))))+1
@@ -20,8 +22,9 @@ def calc(F,x): return eval(F)%2
 
 def format(F):
     F = re.sub(r'(x\d+)', (lambda m: '('+m.group(1)+')'), F)
-    F = re.sub(r'(-\(x\d+\))', (lambda m: '('+m.group(1)+')'), F)
+    F = re.sub(r'('+NEG+'\(x\d+\))', (lambda m: '('+m.group(1)+')'), F)
     F = re.sub(r'(\d+)', (lambda m: '['+m.group(1)+']'), F)
+    print('Syntax adoptation of formula:',F)
     return F
 
 def adoptate(F):
@@ -48,6 +51,7 @@ def adoptate(F):
                 count = 1
         body = "1+("+body+'))'
         F = F[:slice_from] + body + F[slice_to:]
+    print('Algebra representation of formula:',F)
     return F
 
 def get_semantic(F):
@@ -64,4 +68,4 @@ def get_semantic(F):
             semantic_string[m] = " "
     return semantic
 
-if __name__ == '__main__': print(isTautology(input('F:')))
+if __name__ == '__main__': print('Is tautology:',isTautology(format(input('Enter formula:'))))
