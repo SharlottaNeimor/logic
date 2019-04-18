@@ -1,5 +1,17 @@
 import re
 
+'''
+Syntax
+# the whole formula must be taken in parentheses
+# formula cannot contain any space symbol
+# symbols of variables must be entered as x<number>. Example: x1,x2,x1386
+# for better performance, it is advisable to take numbers in variable names in order from 0
+
+Examples
+@ (x0>(x1>-x2))     is not tautology
+@ (x0>(x1>(x2>x0))) is tautology
+'''
+
 NEG = '-'
 IMP = '>'
 
