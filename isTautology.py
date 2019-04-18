@@ -1,7 +1,7 @@
 import re
 
 NEG = '-'
-IMP = '@'
+IMP = '>'
 
 def isTautology(F):
     _arity = arity(F)
@@ -17,6 +17,12 @@ def isTautology(F):
 def arity(F): return max(list(map(int,re.findall(r'\d+',F))))+1
 
 def calc(F,x): return eval(F)%2
+
+def format(F):
+    F = re.sub(r'(x\d+)', (lambda m: '('+m.group(1)+')'), F)
+    F = re.sub(r'(-\(x\d+\))', (lambda m: '('+m.group(1)+')'), F)
+    F = re.sub(r'(\d+)', (lambda m: '['+m.group(1)+']'), F)
+    return F
 
 def adoptate(F):
     F = F.replace(NEG,'1+')
@@ -58,6 +64,4 @@ def get_semantic(F):
             semantic_string[m] = " "
     return semantic
 
-if __name__ == '__main__':
-    F = input('F:')
-    print(isTautology(F))
+if __name__ == '__main__': print(isTautology(input('F:')))
