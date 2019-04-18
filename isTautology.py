@@ -3,8 +3,6 @@ import re
 NEG = '-'
 IMP = '@'
 
-#F1 = F.replace(NEG,'1+')
-
 def isTautology(F):
     _arity = arity(F)
     F = adoptate(F)
