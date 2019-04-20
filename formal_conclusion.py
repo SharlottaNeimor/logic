@@ -51,7 +51,7 @@ def T1(F):
     return [[],Conclusion[4][1]]
 
 def T2(F):
-    return [[],'('+F+IMP+'('+NEG+'('+NEG+'('+F+')'+')'++'))']
+    return [[],'('+F+IMP+'('+NEG+'('+NEG+'('+F+')'+')'+'))']
 def T3(F,G):
     return [[],'('+'('+NEG+'('+F+')'+')'+IMP+'('+F+IMP+G+')'+')']
 def T4(): pass
