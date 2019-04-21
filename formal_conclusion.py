@@ -1,7 +1,13 @@
 from isTautology import *
+from Logger import Logger
 
 def NOT(F): return '('+NEG+F+')'
 def IMPLICATION(F,G): return '('+F+IMP+G+')'
+
+def alphicate(F,a):
+	if calc(F,a) == 1:
+		return F
+	return NOT(F)
 
 def sub_formulas(F):
 	if F[:3] == '(x[':
@@ -23,9 +29,18 @@ def sub_formulas(F):
 		out.append(F[len(out[0])+2:len(F)-1])
 		return [out,2]
 
-def A1(F,G): return '('+F+IMP+'('+G+IMP+F+')'+')'
-def A2(F,G,H): return '('+'('+F+IMP+'('+G+IMP+H+')'+')'+IMP+'('+'('+F+IMP+G+')'+IMP+'('+F+IMP+H+')'+')'+')'
-def A3(F,G): return '('+'('+'('+NEG+G+')'+IMP+'('+NEG+F+')'+')'+IMP+'('+'('+'('+NEG+G+')'+IMP+F+')'+IMP+G+')'+')'
+def A1(F,G): 
+	P = IMPLICATION(F,IMPLICATION(G,F))
+	Logger(P,'A1 for '+F+' and '+G)
+	return P
+def A2(F,G,H): 
+	P = IMPLICATION(IMPLICATION(F,IMPLICATION(G,H)),IMPLICATION(IMPLICATION(F,G),IMPLICATION(F,H)))
+	Logger(P,'A2 for '+F+' and '+G+' and '+H)
+	return P
+def A3(F,G): 
+	P = IMPLICATION(IMPLICATION(NOT(G),NOT(F)),IMPLICATION(IMPLICATION(NOT(G),F),G))
+	Logger(P,'A3 for '+F+' and '+G)
+	return '('+'('+'('+NEG+G+')'+IMP+'('+NEG+F+')'+')'+IMP+'('+'('+'('+NEG+G+')'+IMP+F+')'+IMP+G+')'+')'
 
 def S1(F,G,H):
 	Hypothesys = ['('+F+IMP+G+')','('+G+IMP+H+')']
@@ -143,7 +158,9 @@ def TL(F):
 	return F5
 
 def modus_ponens(A,B):
-	if A == B[1:len(A)+1]: return B[len(A)+2:len(B)-1]
+	if A == B[1:len(A)+1]: 
+		Logger(B[1:len(A)+1], 'Modus ponens for '+A+' and '+B)
+		return B[len(A)+2:len(B)-1]
 
 def is_modus_ponens(A,P,Q): return A == modus_ponens(P,Q)
 
@@ -156,13 +173,13 @@ def deduction_theorem(Hypothesys,F,G,Conclusion):
 			if Conclusion[0] == F: 
 				D = TL(F)
 				_Conclusion.append(D)
-				print('A',D)
+				#print('A',D)
 			else:
 				F11 = A1(Conclusion[i],F)
 				D = modus_ponens(Conclusion[i],F11)
 				_Conclusion.append(F11)
 				_Conclusion.append(D)
-				print('B',D)
+				#print('B',D)
 		else:
 			T = True
 			for p in range(i):
@@ -174,77 +191,135 @@ def deduction_theorem(Hypothesys,F,G,Conclusion):
 						_Conclusion.append(F12)
 						_Conclusion.append(F22)
 						_Conclusion.append(D)
-						print('C',D)
+						#print('C',D)
 						T = False
 			if T and Conclusion[i] == F: 
 				D = TL(F)
 				_Conclusion.append(D)
-				print('D',D)
+				#print('D',D)
 			elif T:
 				F11 = A1(Conclusion[i],F)
 				D = modus_ponens(Conclusion[i],F11)
 				_Conclusion.append(F11)
 				_Conclusion.append(D)
-				print('E',D)
+				#print('E',D)
 	return [Hypothesys,D,_Conclusion]
 
 def kalmar_lemma(F,alpha):
-	S = sub_formulas(F)
-	_arity = arity(F)
-	x = [0]*_arity[0]
-	for i in range(_arity[1]):
-		if alpha[i] == 1:
-			x[i] = '(x['+str(_arity[2][i])+'])'
-		elif alpha[i] == 0:
-			x[i] = '('+NEG+'(x['+str(_arity[2][i])+']))'
-	if S[1] == 0: return [x,F,alpha]
-	elif S[1] == 1:
-		if calc(adoptate(F),alpha) == 1: return [x,F,alpha]
-		elif calc(adoptate(F),alpha) == 0:
-			G = kalmar_lemma(sub_formulas(F)[0][0],alpha)[1]
-			F1 = T2(G)[1]
-			F2 = modus_ponens(G,F1)
-			return [x,F2[2:len(F2)-1],alpha]
-	elif S[1] == 2:
-		G = kalmar_lemma(sub_formulas(F)[0][0],alpha)[1]
-		H = kalmar_lemma(sub_formulas(F)[0][1],alpha)[1]
-		if calc(adoptate(G),alpha) == 0:
-			F1 = T3(G,H)[1]
-			F2 = modus_ponens('('+NEG+'('+G+')'+')',F1)
-			return [x,F2,alpha]
-		elif calc(adoptate(H),alpha) == 1:
-			F1 = A1(H,G)
-			F2 = modus_ponens(H,F1)
-			return [x,F2,alpha]
+	out = []
+	if sub_formulas(F)[1] == 0:
+		out.extend([alphicate(F,alpha)])
+	else:
+		if sub_formulas(F)[1] == 1:
+			if calc(adoptate(F),alpha) == 1:
+				out.extend(kalmar_lemma(sub_formulas(F)[0][0],alpha))
+			else:
+				out.extend(kalmar_lemma(sub_formulas(F)[0][0],alpha))
+				out.append(T2(out[len(out)-1])[1])
 		else:
-			F1 = T6(G,H)[1]
-			F2 = modus_ponens(G,F1)
-			F3 = modus_ponens('('+NEG+'('+H+')'+')',F2)
-			return [x,F3[2:len(F3)-1],alpha]
+			sF = sub_formulas(F)[0]
+			if calc(adoptate(sF[0]),alpha) == 0:
+				out.extend(kalmar_lemma(sF[0],alpha))
+				F1 = out[len(out)-1]
+				out.append(T3(sF[0],sF[1])[1])
+				F2 = out[len(out)-1]
+				F3 = modus_ponens(F1,F2)
+				out.append(F3)
+			elif calc(adoptate(sF[1]),alpha) == 1:
+				out.extend(kalmar_lemma(sF[1],alpha))
+				F1 = out[len(out)-1]
+				F2 = A1(F1,sF[0])
+				out.append(F2)
+				F3 = modus_ponens(F1,F2)
+				out.append(F3)
+			else:
+				out.extend(kalmar_lemma(sF[0],alpha))
+				F1 = out[len(out)-1]
+				out.extend(kalmar_lemma(sF[1],alpha))
+				F2 = out[len(out)-1]
+				out.append(T6(sF[0],sF[1])[1])
+				F3 = out[len(out)-1]
+				F4 = modus_ponens(F1,F3)
+				F5 = modus_ponens(F2,F4)
+				out.append(F4)
+				out.append(F5)
+	return out
+
+def gen_alphas(arity):
+	alphas = []
+	for i in range(2**(arity)):
+		alpha = [0]*arity
+		v = str(bin(i))[2:]
+		for l in range(len(v)):
+			alpha[l] = int(v[len(v)-l-1])
+		alpha = list(reversed(alpha))
+		alphas.append(alpha)
+	return alphas
 
 def adequacy_theorem(F):
 	if not isTautology(F): return None
-	_arity = arity(F)[0]
-	for j in range(_arity):
-		XA = []
-		for i in range(2**(j+1)):
-			alpha = [0]*_arity
-			v = str(bin(i))[2:]
-			for l in range(len(v)):
-				alpha[l] = int(v[len(v)-l-1])
-			alpha = list(reversed(alpha))
-			Kalmar = kalmar_lemma(F,alpha)
-			XA.append(deduction_theorem(Kalmar[0][:(_arity-j-1)],Kalmar[0][(_arity-j-1)],F,True)[1])
-		XA = list(sorted(list(set(XA))))
-		F1 = T7('(x['+str(_arity-j-1)+'])',F)[1]
-		F2 = modus_ponens(XA[1],F1)
-		F3 = modus_ponens(XA[0],F2)
-	return [[],F3]
+	_arity = arity(F)[0]-1
+	out = [None]*_arity
+	ALPHAS = gen_alphas(_arity+1)
+	for i in range(_arity):
+		out[i] = kalmar_lemma(F,ALPHAS[i])
+	while _arity != 0:
+		_arity = _arity-1
+		ALPHAS = gen_alphas(_arity+1)
+		for i in range(_arity):
+			ALPHAS[i][len(ALPHAS[i])-1] = 1
+			Hypothesys = []
+			for j in range(_arity-1):
+				Hypothesys.append(alphicate('(x['+str(j)+'])',ALPHAS[i]))
+			T = deduction_theorem(Hypothesys,alphicate('(x['+str(_arity)+'])',ALPHAS[i]),F,out[i])
+			F1 = T[1]
+			F1_ = T[2]
+
+			ALPHAS[i][len(ALPHAS[i])-1] = 0 
+			T = deduction_theorem(Hypothesys,alphicate('(x['+str(_arity)+'])',ALPHAS[i]),F,out[i])
+			F2 = T[1]
+			F2_ = T[2]
+
+			F3 = T7('(x['+str(_arity)+'])',F)[1]
+			F4 = modus_ponens(F1,F3)
+			F5 = modus_ponens(F2,F4)
+
+			res = F1_
+			res.extend(F2_)
+			res.append(F4)
+			res.append(F5)
+			out[i] = res
+	_arity = _arity-1
+	ALPHAS = [[0],[1]]
+	alpha = ALPHAS[1]
+	Hypothesys = []
+	T = deduction_theorem(Hypothesys,alphicate('(x[0])',alpha),F,out[0])
+	F1 = T[1]
+	F1_ = T[2]
+
+	alpha = ALPHAS[0]
+	T = deduction_theorem(Hypothesys,alphicate('(x[0])',alpha),F,out[0])
+	F2 = T[1]
+	F2_ = T[2]
+
+	F3 = T7('(x[0])',F)[1]
+	F4 = modus_ponens(F1,F3)
+	F5 = modus_ponens(F2,F4)
+	res = F1_
+	res.extend(F2_)
+	res.append(F4)
+	res.append(F5)
+	Logger(F5,'Modus ponens for '+F2+' and '+F4)
+	out[0] = res
+	return res
 
 if __name__ == '__main__':
-	F = format(input('F:'))
-	#if isTautology(F):
-	print(T7('(x[0])','(x[1])'))
-		#C = adequacy_theorem(F)
+	#F = format(input('F:'))
+	F = '(((x1@x0)@x1)@x1)'
+	if isTautology(format(F)):
+		#print(kalmar_lemma(format('(((x1@x0)@x1)@x1)'),[0,0]))
+		#print(gen_alphas(3))
+		#adequacy_theorem(format('(((x1@x2)@x1)@x1)'))
+		C = adequacy_theorem(format(F))
 		#print(C)
-	#else: print('F is not tautology')
+	else: print('F is not tautology')
