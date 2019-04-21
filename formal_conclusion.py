@@ -29,15 +29,15 @@ def sub_formulas(F):
 		out.append(F[len(out[0])+2:len(F)-1])
 		return [out,2]
 
-def A1(F,G): 
+def A1(F,G):
 	P = IMPLICATION(F,IMPLICATION(G,F))
 	Logger(P,'A1 for '+F+' and '+G)
 	return P
-def A2(F,G,H): 
+def A2(F,G,H):
 	P = IMPLICATION(IMPLICATION(F,IMPLICATION(G,H)),IMPLICATION(IMPLICATION(F,G),IMPLICATION(F,H)))
 	Logger(P,'A2 for '+F+' and '+G+' and '+H)
 	return P
-def A3(F,G): 
+def A3(F,G):
 	P = IMPLICATION(IMPLICATION(NOT(G),NOT(F)),IMPLICATION(IMPLICATION(NOT(G),F),G))
 	Logger(P,'A3 for '+F+' and '+G)
 	return '('+'('+'('+NEG+G+')'+IMP+'('+NEG+F+')'+')'+IMP+'('+'('+'('+NEG+G+')'+IMP+F+')'+IMP+G+')'+')'
@@ -158,8 +158,8 @@ def TL(F):
 	return F5
 
 def modus_ponens(A,B):
-	if A == B[1:len(A)+1]: 
-		Logger(B[1:len(A)+1], 'Modus ponens for '+A+' and '+B)
+	if A == B[1:len(A)+1]:
+		Logger(B[len(A)+2:len(B)-1], 'Modus ponens for '+A+' and '+B)
 		return B[len(A)+2:len(B)-1]
 
 def is_modus_ponens(A,P,Q): return A == modus_ponens(P,Q)
@@ -168,7 +168,7 @@ def deduction_theorem(Hypothesys,F,G,Conclusion):
 	_Conclusion = []
 	for i in range(len(Conclusion)):
 		if i == 0:
-			if Conclusion[0] == F: 
+			if Conclusion[0] == F:
 				D = TL(F)
 				_Conclusion.append(D)
 				#print('A',D)
@@ -191,7 +191,7 @@ def deduction_theorem(Hypothesys,F,G,Conclusion):
 						_Conclusion.append(D)
 						#print('C',D)
 						T = False
-			if T and Conclusion[i] == F: 
+			if T and Conclusion[i] == F:
 				D = TL(F)
 				_Conclusion.append(D)
 				#print('D',D)
@@ -273,7 +273,7 @@ def adequacy_theorem(F):
 			F1 = T[1]
 			F1_ = T[2]
 
-			ALPHAS[i][len(ALPHAS[i])-1] = 0 
+			ALPHAS[i][len(ALPHAS[i])-1] = 0
 			T = deduction_theorem(Hypothesys,alphicate('(x['+str(_arity)+'])',ALPHAS[i]),F,out[i])
 			F2 = T[1]
 			F2_ = T[2]
@@ -307,7 +307,7 @@ def adequacy_theorem(F):
 	res.extend(F2_)
 	res.append(F4)
 	res.append(F5)
-	Logger(F5,'Modus ponens for '+F2+' and '+F4)
+	#Logger(F5,'Modus ponens for '+F2+' and '+F4)
 	out[0] = res
 	return res
 
