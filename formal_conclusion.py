@@ -166,8 +166,6 @@ def is_modus_ponens(A,P,Q): return A == modus_ponens(P,Q)
 
 def deduction_theorem(Hypothesys,F,G,Conclusion):
 	_Conclusion = []
-	if Conclusion == True:
-		return [Hypothesys,'('+F+IMP+G+')']
 	for i in range(len(Conclusion)):
 		if i == 0:
 			if Conclusion[0] == F: 
