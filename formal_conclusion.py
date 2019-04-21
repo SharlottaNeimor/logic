@@ -131,14 +131,14 @@ def T7(F,G):
 	out = S1(F1,IMPLICATION(NOT(G),NOT(F)),IMPLICATION(IMPLICATION(NOT(G),F),G))[2]
 	F5 = modus_ponens(F1,F4)
 	F6 = T4(NOT(G),F)[1]
-	F7 = LT7(F,G)
+	F7 = Sub_Lemma_For_T7(F,G)
 	F8 = S1(IMPLICATION(NOT(F),G),IMPLICATION(NOT(F),NOT(NOT(G))),IMPLICATION(NOT(G),F))[1]
 	out.extend(S1(IMPLICATION(NOT(F),G),IMPLICATION(NOT(F),NOT(NOT(G))),IMPLICATION(NOT(G),F))[2])
 	F9 = S1(IMPLICATION(NOT(F),G),IMPLICATION(NOT(G),F),G)[1]
 	out.extend(S1(IMPLICATION(NOT(F),G),IMPLICATION(NOT(G),F),G)[2])
 	out = deduction_theorem([],F1,F9,out)
 	return [[],out[1]]
-def LT7(F,G):
+def Sub_Lemma_For_T7(F,G):
 	F1 = NOT(F)
 	F2 = IMPLICATION(NOT(F),G)
 	F3 = modus_ponens(F1,F2)
