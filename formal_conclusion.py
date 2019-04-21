@@ -256,29 +256,28 @@ def gen_alphas(arity):
 
 def adequacy_theorem(F):
 	if not isTautology(F): return None
-	_arity = arity(F)[0]-1
+	_arity = arity(F)[0]
 	out = [None]*_arity
 	ALPHAS = gen_alphas(_arity+1)
 	for i in range(_arity):
 		out[i] = kalmar_lemma(F,ALPHAS[i])
 	while _arity != 0:
-		_arity = _arity-1
-		ALPHAS = gen_alphas(_arity+1)
+		ALPHAS = gen_alphas(_arity)
 		for i in range(_arity):
 			ALPHAS[i][len(ALPHAS[i])-1] = 1
 			Hypothesys = []
-			for j in range(_arity-1):
+			for j in range(_arity-2):
 				Hypothesys.append(alphicate('(x['+str(j)+'])',ALPHAS[i]))
-			T = deduction_theorem(Hypothesys,alphicate('(x['+str(_arity)+'])',ALPHAS[i]),F,out[i])
+			T = deduction_theorem(Hypothesys,alphicate('(x['+str(_arity-1)+'])',ALPHAS[i]),F,out[i])
 			F1 = T[1]
 			F1_ = T[2]
 
 			ALPHAS[i][len(ALPHAS[i])-1] = 0
-			T = deduction_theorem(Hypothesys,alphicate('(x['+str(_arity)+'])',ALPHAS[i]),F,out[i])
+			T = deduction_theorem(Hypothesys,alphicate('(x['+str(_arity-1)+'])',ALPHAS[i]),F,out[i])
 			F2 = T[1]
 			F2_ = T[2]
 
-			F3 = T7('(x['+str(_arity)+'])',F)[1]
+			F3 = T7('(x['+str(_arity-1)+'])',F)[1]
 			F4 = modus_ponens(F1,F3)
 			F5 = modus_ponens(F2,F4)
 
@@ -287,37 +286,10 @@ def adequacy_theorem(F):
 			res.append(F4)
 			res.append(F5)
 			out[i] = res
-	_arity = _arity-1
-	ALPHAS = [[0],[1]]
-	alpha = ALPHAS[1]
-	Hypothesys = []
-	T = deduction_theorem(Hypothesys,alphicate('(x[0])',alpha),F,out[0])
-	F1 = T[1]
-	F1_ = T[2]
-
-	alpha = ALPHAS[0]
-	T = deduction_theorem(Hypothesys,alphicate('(x[0])',alpha),F,out[0])
-	F2 = T[1]
-	F2_ = T[2]
-
-	F3 = T7('(x[0])',F)[1]
-	F4 = modus_ponens(F1,F3)
-	F5 = modus_ponens(F2,F4)
-	res = F1_
-	res.extend(F2_)
-	res.append(F4)
-	res.append(F5)
-	#Logger(F5,'Modus ponens for '+F2+' and '+F4)
-	out[0] = res
+		_arity = _arity-1
 	return res
 
 if __name__ == '__main__':
-	#F = format(input('F:'))
-	F = '(((x1@x0)@x1)@x1)'
-	if isTautology(format(F)):
-		#print(kalmar_lemma(format('(((x1@x0)@x1)@x1)'),[0,0]))
-		#print(gen_alphas(3))
-		#adequacy_theorem(format('(((x1@x2)@x1)@x1)'))
-		C = adequacy_theorem(format(F))
-		#print(C)
+	F = input('F:')
+	if isTautology(format(F)): C = adequacy_theorem(format(F))
 	else: print('F is not tautology')
