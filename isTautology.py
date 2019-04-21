@@ -14,7 +14,7 @@ Examples
 '''
 
 NEG = '-'
-IMP = '>'
+IMP = '@'
 
 def isTautology(F):
     _arity = arity(F)[0]
